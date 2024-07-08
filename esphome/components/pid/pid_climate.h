@@ -18,7 +18,7 @@ class PIDClimate : public climate::Climate, public Component {
   void setup() override;
   void dump_config() override;
 
-  void set_sensor(sensor::Sensor *sensor) { sensor_ = sensor; }
+  void set_sensor(sensor::Sensor *sensor) { sensor_temperature_room_ = sensor; } // LB
   void set_humidity_sensor(sensor::Sensor *sensor) { humidity_sensor_ = sensor; }
   void set_cool_output(output::FloatOutput *cool_output) { cool_output_ = cool_output; }
   void set_heat_output(output::FloatOutput *heat_output) { heat_output_ = heat_output; }
@@ -85,7 +85,7 @@ class PIDClimate : public climate::Climate, public Component {
   void write_output_(float value);
 
   /// The sensor used for getting the current temperature
-  sensor::Sensor *sensor_;
+  sensor::Sensor *sensor_temperature_room_;
   /// The sensor used for getting the current humidity
   sensor::Sensor *humidity_sensor_{nullptr};
   output::FloatOutput *cool_output_{nullptr};

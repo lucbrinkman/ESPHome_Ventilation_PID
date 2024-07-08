@@ -7,13 +7,13 @@ namespace pid {
 static const char *const TAG = "pid.climate";
 
 void PIDClimate::setup() {
-  this->sensor_->add_on_state_callback([this](float state) {
+  this->sensor_temperature_room_->add_on_state_callback([this](float state) {
     // only publish if state/current temperature has changed in two digits of precision
     this->do_publish_ = roundf(state * 100) != roundf(this->current_temperature * 100);
     this->current_temperature = state;
     this->update_pid_();
   });
-  this->current_temperature = this->sensor_->state;
+  this->current_temperature = this->sensor_temperature_room_->state;
 
   // register for humidity values and get initial state
   if (this->humidity_sensor_ != nullptr) {
