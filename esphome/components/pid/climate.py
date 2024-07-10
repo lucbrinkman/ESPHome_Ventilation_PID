@@ -40,11 +40,17 @@ CONF_KP_MULTIPLIER = "kp_multiplier"
 CONF_KI_MULTIPLIER = "ki_multiplier"
 CONF_KD_MULTIPLIER = "kd_multiplier"
 
+
+# LB
+CONF_SENSOR_TROOM = "sensor_temperature_room"
+CONF_SENSOR_TOUTSIDE = "sensor_temperature_outside"
+
 CONFIG_SCHEMA = cv.All(
     climate.CLIMATE_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(PIDClimate),
-            cv.Required(CONF_SENSOR): cv.use_id(sensor.Sensor),
+            cv.Required(CONF_SENSOR_TROOM): cv.use_id(sensor.Sensor),
+            cv.Optional(CONF_SENSOR_TOUTSIDE): cv.use_id(sensor.Sensor),
             cv.Optional(CONF_HUMIDITY_SENSOR): cv.use_id(sensor.Sensor),
             cv.Required(CONF_DEFAULT_TARGET_TEMPERATURE): cv.temperature,
             cv.Optional(CONF_COOL_OUTPUT): cv.use_id(output.FloatOutput),
@@ -84,12 +90,17 @@ async def to_code(config):
     await cg.register_component(var, config)
     await climate.register_climate(var, config)
 
-    sens = await cg.get_variable(config[CONF_SENSOR])
-    cg.add(var.set_sensor(sens))
+    sens = await cg.get_variable(config[CONF_SENSOR_TROOM])
+    cg.add(var.set_sensor_troom(sens)) # LB
 
     if CONF_HUMIDITY_SENSOR in config:
         sens = await cg.get_variable(config[CONF_HUMIDITY_SENSOR])
         cg.add(var.set_humidity_sensor(sens))
+
+# LB
+    if CONF_SENSOR_TOUTSIDE in config:
+        sens = await cg.get_variable(config[CONF_SENSOR_TOUTSIDE])
+        cg.add(var.set_sensor_toutside(sens))
 
     if CONF_COOL_OUTPUT in config:
         out = await cg.get_variable(config[CONF_COOL_OUTPUT])
