@@ -1,6 +1,6 @@
 from esphome.core import coroutine
 from esphome import automation
-from esphome.components import climate, sensor, uart, remote_transmitter
+from esphome.components import climate_LB, sensor, uart, remote_transmitter
 from esphome.components.remote_base import CONF_TRANSMITTER_ID
 import esphome.config_validation as cv
 import esphome.codegen as cg
@@ -29,7 +29,7 @@ from esphome.const import (
     UNIT_PERCENT,
     UNIT_WATT,
 )
-from esphome.components.climate import (
+from esphome.components.climate_LB import (
     ClimateMode,
     ClimatePreset,
     ClimateSwingMode,
@@ -41,7 +41,7 @@ AUTO_LOAD = ["sensor"]
 CONF_POWER_USAGE = "power_usage"
 CONF_HUMIDITY_SETPOINT = "humidity_setpoint"
 midea_ac_ns = cg.esphome_ns.namespace("midea").namespace("ac")
-AirConditioner = midea_ac_ns.class_("AirConditioner", climate.Climate, cg.Component)
+AirConditioner = midea_ac_ns.class_("AirConditioner", climate_LB.Climate, cg.Component)
 Capabilities = midea_ac_ns.namespace("Constants")
 
 
@@ -107,7 +107,7 @@ validate_custom_fan_modes = cv.enum(CUSTOM_FAN_MODES, upper=True)
 validate_custom_presets = cv.enum(CUSTOM_PRESETS, upper=True)
 
 CONFIG_SCHEMA = cv.All(
-    climate.CLIMATE_SCHEMA.extend(
+    climate_LB.CLIMATE_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(AirConditioner),
             cv.Optional(CONF_PERIOD, default="1s"): cv.time_period,
@@ -264,7 +264,7 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
-    await climate.register_climate(var, config)
+    await climate_LB.register_climate(var, config)
     cg.add(var.set_period(config[CONF_PERIOD].total_milliseconds))
     cg.add(var.set_response_timeout(config[CONF_TIMEOUT].total_milliseconds))
     cg.add(var.set_request_attempts(config[CONF_NUM_ATTEMPTS]))

@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.components import climate, sensor
+from esphome.components import climate_LB, sensor
 from esphome.const import (
     CONF_AWAY_CONFIG,
     CONF_COOL_ACTION,
@@ -15,11 +15,11 @@ from esphome.const import (
 )
 
 bang_bang_ns = cg.esphome_ns.namespace("bang_bang")
-BangBangClimate = bang_bang_ns.class_("BangBangClimate", climate.Climate, cg.Component)
+BangBangClimate = bang_bang_ns.class_("BangBangClimate", climate_LB.Climate, cg.Component)
 BangBangClimateTargetTempConfig = bang_bang_ns.struct("BangBangClimateTargetTempConfig")
 
 CONFIG_SCHEMA = cv.All(
-    climate.CLIMATE_SCHEMA.extend(
+    climate_LB.CLIMATE_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(BangBangClimate),
             cv.Required(CONF_SENSOR): cv.use_id(sensor.Sensor),
@@ -44,7 +44,7 @@ CONFIG_SCHEMA = cv.All(
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-    await climate.register_climate(var, config)
+    await climate_LB.register_climate(var, config)
 
     sens = await cg.get_variable(config[CONF_SENSOR])
     cg.add(var.set_sensor(sens))

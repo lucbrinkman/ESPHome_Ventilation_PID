@@ -2,7 +2,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 import esphome.final_validate as fv
-from esphome.components import uart, climate, logger
+from esphome.components import uart, climate_LB, logger
 from esphome import automation
 from esphome.const import (
     CONF_BEEPER,
@@ -24,7 +24,7 @@ from esphome.const import (
     CONF_VISUAL,
     CONF_WIFI,
 )
-from esphome.components.climate import (
+from esphome.components.climate_LB import (
     ClimateMode,
     ClimatePreset,
     ClimateSwingMode,
@@ -63,7 +63,7 @@ PROTOCOL_SMARTAIR2 = "SMARTAIR2"
 haier_ns = cg.esphome_ns.namespace("haier")
 hon_protocol_ns = haier_ns.namespace("hon_protocol")
 HaierClimateBase = haier_ns.class_(
-    "HaierClimateBase", uart.UARTDevice, climate.Climate, cg.Component
+    "HaierClimateBase", uart.UARTDevice, climate_LB.Climate, cg.Component
 )
 HonClimate = haier_ns.class_("HonClimate", HaierClimateBase)
 Smartair2Climate = haier_ns.class_("Smartair2Climate", HaierClimateBase)
@@ -186,7 +186,7 @@ def validate_visual(config):
 
 
 BASE_CONFIG_SCHEMA = (
-    climate.CLIMATE_SCHEMA.extend(
+    climate_LB.CLIMATE_SCHEMA.extend(
         {
             cv.Optional(CONF_SUPPORTED_MODES): cv.ensure_list(
                 cv.enum(SUPPORTED_CLIMATE_MODES_OPTIONS, upper=True)
@@ -465,7 +465,7 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
-    await climate.register_climate(var, config)
+    await climate_LB.register_climate(var, config)
 
     cg.add(var.set_send_wifi(config[CONF_WIFI_SIGNAL]))
     if CONF_CONTROL_METHOD in config:

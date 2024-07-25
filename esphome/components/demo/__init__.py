@@ -2,7 +2,7 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import (
     binary_sensor,
-    climate,
+    climate_LB,
     cover,
     fan,
     light,
@@ -61,7 +61,7 @@ demo_ns = cg.esphome_ns.namespace("demo")
 DemoBinarySensor = demo_ns.class_(
     "DemoBinarySensor", binary_sensor.BinarySensor, cg.PollingComponent
 )
-DemoClimate = demo_ns.class_("DemoClimate", climate.Climate, cg.Component)
+DemoClimate = demo_ns.class_("DemoClimate", climate_LB.Climate, cg.Component)
 DemoClimateType = demo_ns.enum("DemoClimateType", is_class=True)
 DemoCover = demo_ns.class_("DemoCover", cover.Cover, cg.Component)
 DemoCoverType = demo_ns.enum("DemoCoverType", is_class=True)
@@ -153,7 +153,7 @@ CONFIG_SCHEMA = cv.Schema(
                 },
             ],
         ): [
-            climate.CLIMATE_SCHEMA.extend(cv.COMPONENT_SCHEMA).extend(
+            climate_LB.CLIMATE_SCHEMA.extend(cv.COMPONENT_SCHEMA).extend(
                 {
                     cv.GenerateID(): cv.declare_id(DemoClimate),
                     cv.Required(CONF_TYPE): cv.enum(CLIMATE_TYPES, int=True),
@@ -379,7 +379,7 @@ async def to_code(config):
     for conf in config[CONF_CLIMATES]:
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
-        await climate.register_climate(var, conf)
+        await climate_LB.register_climate(var, conf)
         cg.add(var.set_type(conf[CONF_TYPE]))
 
     for conf in config[CONF_COVERS]:

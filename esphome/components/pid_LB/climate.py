@@ -1,11 +1,11 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.components import climate, sensor, output
+from esphome.components import climate_LB, sensor, output
 from esphome.const import CONF_HUMIDITY_SENSOR, CONF_ID, CONF_SENSOR
 
 pid_ns = cg.esphome_ns.namespace("pid")
-PIDClimate = pid_ns.class_("PIDClimate", climate.Climate, cg.Component)
+PIDClimate = pid_ns.class_("PIDClimate", climate_LB.Climate, cg.Component)
 PIDAutotuneAction = pid_ns.class_("PIDAutotuneAction", automation.Action)
 PIDResetIntegralTermAction = pid_ns.class_(
     "PIDResetIntegralTermAction", automation.Action
@@ -46,7 +46,7 @@ CONF_SENSOR_TROOM = "sensor_temperature_room"
 CONF_SENSOR_TOUTSIDE = "sensor_temperature_outside"
 
 CONFIG_SCHEMA = cv.All(
-    climate.CLIMATE_SCHEMA.extend(
+    climate_LB.CLIMATE_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(PIDClimate),
             cv.Required(CONF_SENSOR_TROOM): cv.use_id(sensor.Sensor),
@@ -88,7 +88,7 @@ CONFIG_SCHEMA = cv.All(
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-    await climate.register_climate(var, config)
+    await climate_LB.register_climate(var, config)
 
     sens = await cg.get_variable(config[CONF_SENSOR_TROOM])
     cg.add(var.set_sensor_troom(sens)) # LB

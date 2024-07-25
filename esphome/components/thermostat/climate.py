@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.components import climate, sensor
+from esphome.components import climate_LB, sensor
 from esphome.const import (
     CONF_AUTO_MODE,
     CONF_AWAY_CONFIG,
@@ -79,7 +79,7 @@ CODEOWNERS = ["@kbx81"]
 climate_ns = cg.esphome_ns.namespace("climate")
 thermostat_ns = cg.esphome_ns.namespace("thermostat")
 ThermostatClimate = thermostat_ns.class_(
-    "ThermostatClimate", climate.Climate, cg.Component
+    "ThermostatClimate", climate_LB.Climate, cg.Component
 )
 ThermostatClimateTargetTempConfig = thermostat_ns.struct(
     "ThermostatClimateTargetTempConfig"
@@ -112,9 +112,9 @@ PRESET_CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_MODE): validate_climate_mode,
         cv.Optional(CONF_DEFAULT_TARGET_TEMPERATURE_HIGH): cv.temperature,
         cv.Optional(CONF_DEFAULT_TARGET_TEMPERATURE_LOW): cv.temperature,
-        cv.Optional(CONF_FAN_MODE): cv.templatable(climate.validate_climate_fan_mode),
+        cv.Optional(CONF_FAN_MODE): cv.templatable(climate_LB.validate_climate_fan_mode),
         cv.Optional(CONF_SWING_MODE): cv.templatable(
-            climate.validate_climate_swing_mode
+            climate_LB.validate_climate_swing_mode
         ),
     }
 )
@@ -516,7 +516,7 @@ def validate_thermostat(config):
 
 
 CONFIG_SCHEMA = cv.All(
-    climate.CLIMATE_SCHEMA.extend(
+    climate_LB.CLIMATE_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(ThermostatClimate),
             cv.Required(CONF_SENSOR): cv.use_id(sensor.Sensor),
@@ -642,7 +642,7 @@ CONFIG_SCHEMA = cv.All(
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-    await climate.register_climate(var, config)
+    await climate_LB.register_climate(var, config)
 
     heat_cool_mode_available = CONF_HEAT_ACTION in config and CONF_COOL_ACTION in config
     two_points_available = CONF_HEAT_ACTION in config and (
@@ -889,8 +889,8 @@ async def to_code(config):
         for preset_config in config[CONF_PRESET]:
             name = preset_config[CONF_NAME]
             standard_preset = None
-            if name.upper() in climate.CLIMATE_PRESETS:
-                standard_preset = climate.CLIMATE_PRESETS[name.upper()]
+            if name.upper() in climate_LB.CLIMATE_PRESETS:
+                standard_preset = climate_LB.CLIMATE_PRESETS[name.upper()]
 
             if two_points_available is True:
                 preset_target_config = ThermostatClimateTargetTempConfig(
@@ -934,8 +934,8 @@ async def to_code(config):
         default_preset_name = config[CONF_DEFAULT_PRESET]
 
         # if the name is a built in preset use the appropriate naming format
-        if default_preset_name.upper() in climate.CLIMATE_PRESETS:
-            climate_preset = climate.CLIMATE_PRESETS[default_preset_name.upper()]
+        if default_preset_name.upper() in climate_LB.CLIMATE_PRESETS:
+            climate_preset = climate_LB.CLIMATE_PRESETS[default_preset_name.upper()]
             cg.add(var.set_default_preset(climate_preset))
         else:
             cg.add(var.set_default_preset(default_preset_name))

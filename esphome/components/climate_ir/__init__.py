@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import climate, sensor, remote_base
+from esphome.components import climate_LB, sensor, remote_base
 from esphome.const import CONF_SUPPORTS_COOL, CONF_SUPPORTS_HEAT, CONF_SENSOR
 
 DEPENDENCIES = ["remote_transmitter"]
@@ -10,14 +10,14 @@ CODEOWNERS = ["@glmnet"]
 climate_ir_ns = cg.esphome_ns.namespace("climate_ir")
 ClimateIR = climate_ir_ns.class_(
     "ClimateIR",
-    climate.Climate,
+    climate_LB.Climate,
     cg.Component,
     remote_base.RemoteReceiverListener,
     remote_base.RemoteTransmittable,
 )
 
 CLIMATE_IR_SCHEMA = (
-    climate.CLIMATE_SCHEMA.extend(
+    climate_LB.CLIMATE_SCHEMA.extend(
         {
             cv.Optional(CONF_SUPPORTS_COOL, default=True): cv.boolean,
             cv.Optional(CONF_SUPPORTS_HEAT, default=True): cv.boolean,
@@ -39,7 +39,7 @@ CLIMATE_IR_WITH_RECEIVER_SCHEMA = CLIMATE_IR_SCHEMA.extend(
 
 async def register_climate_ir(var, config):
     await cg.register_component(var, config)
-    await climate.register_climate(var, config)
+    await climate_LB.register_climate(var, config)
     await remote_base.register_transmittable(var, config)
     cg.add(var.set_supports_cool(config[CONF_SUPPORTS_COOL]))
     cg.add(var.set_supports_heat(config[CONF_SUPPORTS_HEAT]))

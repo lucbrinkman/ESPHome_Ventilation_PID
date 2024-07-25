@@ -1,5 +1,5 @@
 from esphome import pins
-from esphome.components import climate
+from esphome.components import climate_LB
 import esphome.config_validation as cv
 import esphome.codegen as cg
 from esphome.const import (
@@ -42,7 +42,7 @@ CONF_MIDDLE_VALUE = "middle_value"
 CONF_HIGH_VALUE = "high_value"
 CONF_AUTO_VALUE = "auto_value"
 
-TuyaClimate = tuya_ns.class_("TuyaClimate", climate.Climate, cg.Component)
+TuyaClimate = tuya_ns.class_("TuyaClimate", climate_LB.Climate, cg.Component)
 
 
 def validate_temperature_multipliers(value):
@@ -150,7 +150,7 @@ SWING_MODES = cv.Schema(
 )
 
 CONFIG_SCHEMA = cv.All(
-    climate.CLIMATE_SCHEMA.extend(
+    climate_LB.CLIMATE_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(TuyaClimate),
             cv.GenerateID(CONF_TUYA_ID): cv.use_id(Tuya),
@@ -195,7 +195,7 @@ CONFIG_SCHEMA = cv.All(
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-    await climate.register_climate(var, config)
+    await climate_LB.register_climate(var, config)
 
     paren = await cg.get_variable(config[CONF_TUYA_ID])
     cg.add(var.set_tuya_parent(paren))
