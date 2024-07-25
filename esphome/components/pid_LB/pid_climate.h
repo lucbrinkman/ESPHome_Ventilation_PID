@@ -3,7 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/automation.h"
-#include "esphome/components/climate_LB/climate.h"
+#include "src/esphome/components/climate_LB/climate.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/output/float_output.h"
 #include "pid_controller.h"
