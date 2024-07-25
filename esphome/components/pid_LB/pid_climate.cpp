@@ -9,11 +9,11 @@ static const char *const TAG = "pid.climate";
 void PIDClimate::setup() {
   this->sensor_temperature_room_->add_on_state_callback([this](float state) {
     // only publish if state/current temperature has changed in two digits of precision
-    this->do_publish_ = roundf(state * 100) != roundf(this->current_temperature * 100);
-    this->current_temperature = state;
+    this->do_publish_ = roundf(state * 100) != roundf(this->current_temperature_room * 100);
+    this->current_temperature_room = state;
     this->update_pid_();
   });
-  this->current_temperature = this->sensor_temperature_room_->state;
+  this->current_temperature_room = this->sensor_temperature_room_->state;
 
   // register for humidity values and get initial state
   if (this->humidity_sensor_ != nullptr) {
@@ -22,6 +22,16 @@ void PIDClimate::setup() {
       this->publish_state();
     });
     this->current_humidity = this->humidity_sensor_->state;
+  }
+
+
+    // LB. Adaptation from above humidity_sensor_
+  if (this->sensor_temperature_outside_ != nullptr) {
+    this->sensor_temperature_outside_->add_on_state_callback([this](float state) {
+      this->current_temperature_outside = state;
+      this->publish_state();
+    });
+    this->current_temperature_outside = this->sensor_temperature_outside_->state;
   }
 
   // restore set points
@@ -54,11 +64,15 @@ void PIDClimate::control(const climate::ClimateCall &call) {
 }
 climate::ClimateTraits PIDClimate::traits() {
   auto traits = climate::ClimateTraits();
-  traits.set_supports_current_temperature(true);
+  traits.set_supports_current_temperature_room(true);
   traits.set_supports_two_point_target_temperature(false);
 
   if (this->humidity_sensor_ != nullptr)
     traits.set_supports_current_humidity(true);
+
+  // LB
+  if (this->sensor_temperature_outside_ != nullptr)
+    traits.set_supports_current_temperature_outside(true);
 
   traits.set_supported_modes({climate::CLIMATE_MODE_OFF});
   if (supports_cool_())
@@ -125,17 +139,27 @@ void PIDClimate::write_output_(float value) {
 }
 void PIDClimate::update_pid_() {
   float value;
-  if (std::isnan(this->current_temperature) || std::isnan(this->target_temperature)) {
+  if (std::isnan(this->current_temperature_room) || std::isnan(this->target_temperature)) {
     // if any control parameters are nan, turn off all outputs
     value = 0.0;
   } else {
     // Update PID controller irrespective of current mode, to not mess up D/I terms
     // In non-auto mode, we just discard the output value
-    value = this->controller_.update(this->target_temperature, this->current_temperature);
+
+    // LB addition
+    float realistic_target_temperature 
+    if (this->supports_current_temperature_outside()) {
+      realistic_target_temperature = std::max(this->target_temperature, this->current_temperature_outside + 2.0f);
+    } else {
+      realistic_target_temperature = this->target_temperature;
+    }
+    
+
+    value = this->controller_.update(realistic_target_temperature, this->current_temperature_room); // LB (edit only)
 
     // Check autotuner
     if (this->autotuner_ != nullptr && !this->autotuner_->is_finished()) {
-      auto res = this->autotuner_->update(this->target_temperature, this->current_temperature);
+      auto res = this->autotuner_->update(this->target_temperature, this->current_temperature_room);
       if (res.result_params.has_value()) {
         this->controller_.kp_ = res.result_params->kp;
         this->controller_.ki_ = res.result_params->ki;
