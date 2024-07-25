@@ -176,7 +176,7 @@ class Climate : public EntityBase {
   ClimateAction action{CLIMATE_ACTION_OFF};
 
   /// The current temperature of the climate device, as reported from the integration.
-  float current_temperature{NAN};
+  float current_temperature_room{NAN};
 
   /// The current humidity of the climate device, as reported from the integration.
   float current_humidity{NAN};
